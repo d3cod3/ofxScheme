@@ -61,12 +61,12 @@ common:
 	# ADDON_LIBS_EXCLUDE =
 
 linux64:
-        ADDON_INCLUDES += /usr/local/Cellar/guile/3.0.4/include/guile/3.0 /usr/local/opt/gmp/include /usr/local/opt/readline/include /usr/local/opt/bdw-gc/include
-        ADDON_LDFLAGS += -lguile-3.0 -lgc
+        ADDON_INCLUDES += /usr/include/guile/2.2
+        ADDON_LDFLAGS += -lguile-2.2 -lgc
 
 linux:
-        ADDON_INCLUDES += /usr/local/Cellar/guile/3.0.4/include/guile/3.0 /usr/local/opt/gmp/include /usr/local/opt/readline/include /usr/local/opt/bdw-gc/include
-        ADDON_LDFLAGS += -lguile-3.0 -lgc
+        ADDON_INCLUDES += /usr/include/guile/2.2
+        ADDON_LDFLAGS += -lguile-2.2 -lgc
 
 osx:
         ADDON_INCLUDES += /usr/local/Cellar/guile/3.0.4/include/guile/3.0 /usr/local/opt/gmp/include /usr/local/opt/readline/include /usr/local/opt/bdw-gc/include
