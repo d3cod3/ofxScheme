@@ -15,5 +15,5 @@ brew install guile
 ### Linux
 
 ```bash
-sudo apt-get install libguile-dev
+sudo apt-get install guile-2.2 guile-2.2-dev
 ```

@@ -34,3 +34,5 @@ bin/.tmp
 obj/
 **/build-example_ofxScheme-Desktop-Debug
 **/build-example_ofxScheme-Desktop-Release
+example_ofxScheme/bin/example_ofxScheme
+example_ofxScheme/bin/example_ofxScheme_debug

@@ -48,9 +48,11 @@ public:
 
 
     //---------------------------------------- API
+    static SCM loop(SCM index, SCM start, SCM end, SCM increment);
     static SCM get_window_width();
     static SCM get_window_height();
     static SCM background(SCM r, SCM g, SCM b);
+    static SCM background_alpha(SCM r, SCM g, SCM b, SCM a);
     static SCM set_color(SCM r, SCM g, SCM b);
     static SCM circle(SCM x, SCM y, SCM r);
     //---------------------------------------- API

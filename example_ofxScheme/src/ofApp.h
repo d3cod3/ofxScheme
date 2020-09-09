@@ -27,7 +27,8 @@ public:
 
     void loadScript(string scriptFile);
 
-    ofxScheme   scheme;
+    ofxScheme           scheme;
+    ofFbo               *fbo;
 
     PathWatcher         watcher;
     ofFile              currentScriptFile;
