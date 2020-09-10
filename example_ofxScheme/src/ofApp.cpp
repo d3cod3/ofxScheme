@@ -123,6 +123,9 @@ void ofApp::pathChanged(const PathWatcher::Event &event) {
 
 //--------------------------------------------------------------
 void ofApp::loadScript(string scriptFile){
+
+    scheme.clearScript();
+
     currentScriptFile.open(scriptFile);
     sketchContent = ofBufferFromFile(currentScriptFile.getAbsolutePath());
 

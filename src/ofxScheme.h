@@ -45,16 +45,28 @@ public:
 
     void setup();
     void evalScript(string scriptContent);
+    void clearScript();
 
 
     //---------------------------------------- API
     static SCM loop(SCM index, SCM start, SCM end, SCM increment);
+    static SCM get_mouse_x();
+    static SCM get_mouse_y();
     static SCM get_window_width();
     static SCM get_window_height();
+    static SCM get_time();
     static SCM background(SCM r, SCM g, SCM b);
     static SCM background_alpha(SCM r, SCM g, SCM b, SCM a);
-    static SCM set_color(SCM r, SCM g, SCM b);
-    static SCM circle(SCM x, SCM y, SCM r);
+    static SCM set_color(SCM r, SCM g, SCM b, SCM a);
+    static SCM fill();
+    static SCM noFill();
+    static SCM push();
+    static SCM pop();
+    static SCM translate(SCM x, SCM y, SCM z);
+    static SCM rotate(SCM x, SCM y, SCM z);
+    static SCM scale(SCM x, SCM y, SCM z);
+    static SCM circle(SCM x, SCM y, SCM r, SCM res);
+    static SCM cube(SCM s);
     //---------------------------------------- API
 
 };

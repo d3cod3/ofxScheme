@@ -34,22 +34,35 @@
 
 void* register_functions(void* data){
     scm_c_define_gsubr("loop", 4, 0, 0, (scm_t_subr)(&ofxScheme::loop));
+
+    scm_c_define_gsubr("MOUSE_X", 0, 0, 0, (scm_t_subr)(&ofxScheme::get_mouse_x));
+    scm_c_define_gsubr("MOUSE_Y", 0, 0, 0, (scm_t_subr)(&ofxScheme::get_mouse_y));
+
     scm_c_define_gsubr("OUTPUT_WIDTH", 0, 0, 0, (scm_t_subr)(&ofxScheme::get_window_width));
     scm_c_define_gsubr("OUTPUT_HEIGHT", 0, 0, 0, (scm_t_subr)(&ofxScheme::get_window_height));
+
+    scm_c_define_gsubr("time", 0, 0, 0, (scm_t_subr)(&ofxScheme::get_time));
+
     scm_c_define_gsubr("background", 3, 0, 0, (scm_t_subr)(&ofxScheme::background));
     scm_c_define_gsubr("background-alpha", 4, 0, 0, (scm_t_subr)(&ofxScheme::background_alpha));
-    scm_c_define_gsubr("set-color",  3, 0, 0, (scm_t_subr)(&ofxScheme::set_color));
-    scm_c_define_gsubr("circle",     3, 0, 0, (scm_t_subr)(&ofxScheme::circle));
+    scm_c_define_gsubr("set-color", 4, 0, 0, (scm_t_subr)(&ofxScheme::set_color));
+    scm_c_define_gsubr("fill", 0, 0, 0, (scm_t_subr)(&ofxScheme::fill));
+    scm_c_define_gsubr("noFill", 0, 0, 0, (scm_t_subr)(&ofxScheme::noFill));
+    scm_c_define_gsubr("push", 0, 0, 0, (scm_t_subr)(&ofxScheme::push));
+    scm_c_define_gsubr("pop", 0, 0, 0, (scm_t_subr)(&ofxScheme::pop));
+    scm_c_define_gsubr("translate", 3, 0, 0, (scm_t_subr)(&ofxScheme::translate));
+    scm_c_define_gsubr("rotate", 3, 0, 0, (scm_t_subr)(&ofxScheme::rotate));
+    scm_c_define_gsubr("scale", 3, 0, 0, (scm_t_subr)(&ofxScheme::scale));
+    scm_c_define_gsubr("draw-circle", 4, 0, 0, (scm_t_subr)(&ofxScheme::circle));
+    scm_c_define_gsubr("draw-cube", 1, 0, 0, (scm_t_subr)(&ofxScheme::cube));
     return NULL;
 }
 
-map<int,int>     loopIterators;
+map<int,int>        loopIterators;
 
 //--------------------------------------------------------------
 ofxScheme::ofxScheme(){
-    for(int i=0;i<1000;i++){
-        loopIterators[i] = 0;
-    }
+
 }
 
 //--------------------------------------------------------------
@@ -68,24 +81,42 @@ void ofxScheme::evalScript(string scriptContent){
   scm_c_eval_string(scriptContent.c_str());
 }
 
+//--------------------------------------------------------------
+void ofxScheme::clearScript(){
+    loopIterators.clear();
+}
 
 //-------------------------------------------------------------- SCHEME DSL LANGUAGE
 //--------------------------------------------------------------
 //--------------------------------------------------------------
-SCM ofxScheme::loop(SCM index, SCM start, SCM end, SCM increment){
-    int ind = scm_to_int16(index);
-    int i = scm_to_int16(increment);
-    int s = scm_to_int16(start);
 
-    if(loopIterators[ind] < scm_to_int16(end)){
-        loopIterators[ind] += i;
-    }else{
-        loopIterators[ind] = s;
+// ------------------------------------------------------------- Structure
+SCM ofxScheme::loop(SCM index, SCM start, SCM end, SCM increment){
+
+    if(loopIterators.find(scm_to_int16(index)) == loopIterators.end()){
+        loopIterators[scm_to_int16(index)] = 0;
     }
 
-    return  scm_from_int16(loopIterators[ind]);
+    if(loopIterators[scm_to_int16(index)] < scm_to_int16(end)){
+        loopIterators[scm_to_int16(index)] += scm_to_int16(increment);
+    }else{
+        loopIterators[scm_to_int16(index)] = scm_to_int16(start);
+    }
+
+    return  scm_from_int16(loopIterators[scm_to_int16(index)]);
 }
 
+// ------------------------------------------------------------- Mouse
+SCM ofxScheme::get_mouse_x(){
+    return scm_from_int16(ofGetMouseX());
+}
+
+SCM ofxScheme::get_mouse_y(){
+    return scm_from_int16(ofGetMouseY());
+}
+
+
+// ------------------------------------------------------------- Window
 SCM ofxScheme::get_window_width(){
     return  scm_from_int16( ofGetWindowWidth() );
 }
@@ -94,6 +125,12 @@ SCM ofxScheme::get_window_height(){
     return  scm_from_int16( ofGetWindowHeight() );
 }
 
+// ------------------------------------------------------------- Time
+SCM ofxScheme::get_time(){
+    return  scm_from_int16( ofGetElapsedTimeMillis() );
+}
+
+// ------------------------------------------------------------- Graphics
 SCM ofxScheme::background(SCM r, SCM g, SCM b){
     ofBackground(255 * scm_to_double(r),255 * scm_to_double(g),255 * scm_to_double(b));
     return SCM_UNSPECIFIED;
@@ -105,15 +142,57 @@ SCM ofxScheme::background_alpha(SCM r, SCM g, SCM b, SCM a){
     return SCM_UNSPECIFIED;
 }
 
-SCM ofxScheme::set_color(SCM r, SCM g, SCM b){
-    ofSetColor(255 * scm_to_double(r),255 * scm_to_double(g),255 * scm_to_double(b));
+SCM ofxScheme::set_color(SCM r, SCM g, SCM b, SCM a){
+    ofSetColor(255 * scm_to_double(r),255 * scm_to_double(g),255 * scm_to_double(b),255 * scm_to_double(a));
     return SCM_UNSPECIFIED;
 }
 
-SCM ofxScheme::circle(SCM x, SCM y, SCM r){
+SCM ofxScheme::fill(){
     ofFill();
-    ofSetCircleResolution(50);
+    return SCM_UNSPECIFIED;
+}
+
+SCM ofxScheme::noFill(){
+    ofNoFill();
+    return SCM_UNSPECIFIED;
+}
+
+SCM ofxScheme::push(){
+    ofPushMatrix();
+    return SCM_UNSPECIFIED;
+}
+
+SCM ofxScheme::pop(){
+    ofPopMatrix();
+    return SCM_UNSPECIFIED;
+}
+
+SCM ofxScheme::translate(SCM x, SCM y, SCM z){
+    ofTranslate(scm_to_double(x),scm_to_double(y),scm_to_double(z));
+    return SCM_UNSPECIFIED;
+}
+
+SCM ofxScheme::rotate(SCM x, SCM y, SCM z){
+    ofRotateXDeg(scm_to_double(x));
+    ofRotateYDeg(scm_to_double(y));
+    ofRotateZDeg(scm_to_double(z));
+    return SCM_UNSPECIFIED;
+}
+
+SCM ofxScheme::scale(SCM x, SCM y, SCM z){
+    ofScale(scm_to_double(x),scm_to_double(y),scm_to_double(z));
+    return SCM_UNSPECIFIED;
+}
+
+
+SCM ofxScheme::circle(SCM x, SCM y, SCM r, SCM res){
+    ofSetCircleResolution(scm_to_int16(res));
     ofDrawCircle(scm_to_double(x),scm_to_double(y),scm_to_double(r));
+    return SCM_UNSPECIFIED;
+}
+
+SCM ofxScheme::cube(SCM s){
+    ofDrawBox(scm_to_double(s));
     return SCM_UNSPECIFIED;
 }
 
