@@ -6,7 +6,7 @@
 int main( ){
 
     ofGLFWWindowSettings settings;
-    settings.setGLVersion(3,2);
+    settings.setGLVersion(2,1);
     settings.setSize(1280,720);
     settings.setPosition(ofVec2f(0,0));
     settings.resizable = true;

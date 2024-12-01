@@ -32,6 +32,8 @@
 
 #include "ofxScheme.h"
 
+//--------------------------------------------------------------
+// Scripting functions -----------------------------------------
 void* register_functions(void* data){
     scm_c_define_gsubr("loop", 4, 0, 0, (scm_t_subr)(&ofxScheme::loop));
 
@@ -48,17 +50,36 @@ void* register_functions(void* data){
     scm_c_define_gsubr("set-color", 4, 0, 0, (scm_t_subr)(&ofxScheme::set_color));
     scm_c_define_gsubr("fill", 0, 0, 0, (scm_t_subr)(&ofxScheme::fill));
     scm_c_define_gsubr("noFill", 0, 0, 0, (scm_t_subr)(&ofxScheme::noFill));
+
     scm_c_define_gsubr("push", 0, 0, 0, (scm_t_subr)(&ofxScheme::push));
     scm_c_define_gsubr("pop", 0, 0, 0, (scm_t_subr)(&ofxScheme::pop));
+    scm_c_define_gsubr("begin-shape", 0, 0, 0, (scm_t_subr)(&ofxScheme::beginShape));
+    scm_c_define_gsubr("end-shape", 0, 0, 0, (scm_t_subr)(&ofxScheme::endShape));
     scm_c_define_gsubr("translate", 3, 0, 0, (scm_t_subr)(&ofxScheme::translate));
     scm_c_define_gsubr("rotate", 3, 0, 0, (scm_t_subr)(&ofxScheme::rotate));
     scm_c_define_gsubr("scale", 3, 0, 0, (scm_t_subr)(&ofxScheme::scale));
+
+    scm_c_define_gsubr("draw-vertex", 3, 0, 0, (scm_t_subr)(&ofxScheme::vertex));
+    scm_c_define_gsubr("draw-line", 5, 0, 0, (scm_t_subr)(&ofxScheme::line));
+    scm_c_define_gsubr("draw-curve", 8, 0, 0, (scm_t_subr)(&ofxScheme::curve));
+    scm_c_define_gsubr("draw-bezier", 8, 0, 0, (scm_t_subr)(&ofxScheme::bezier));
     scm_c_define_gsubr("draw-circle", 4, 0, 0, (scm_t_subr)(&ofxScheme::circle));
+    scm_c_define_gsubr("draw-ellipse", 5, 0, 0, (scm_t_subr)(&ofxScheme::ellipse));
+    scm_c_define_gsubr("draw-rectangle", 5, 0, 0, (scm_t_subr)(&ofxScheme::rectangle));
     scm_c_define_gsubr("draw-cube", 1, 0, 0, (scm_t_subr)(&ofxScheme::cube));
+    scm_c_define_gsubr("draw-sphere", 2, 0, 0, (scm_t_subr)(&ofxScheme::sphere));
+    scm_c_define_gsubr("draw-string", 3, 0, 0, (scm_t_subr)(&ofxScheme::bitmap_string));
+
+
     return NULL;
 }
+//--------------------------------------------------------------
 
+
+// Scheme Live Coding VARS -------------------------------------
 map<int,int>        loopIterators;
+int                 winW, winH;
+
 
 //--------------------------------------------------------------
 ofxScheme::ofxScheme(){
@@ -73,6 +94,8 @@ ofxScheme::~ofxScheme(){
 //--------------------------------------------------------------
 void ofxScheme::setup(){
   scm_with_guile(&register_functions, NULL);
+
+  setWindowDim(1280,720);
 }
 
 
@@ -84,6 +107,12 @@ void ofxScheme::evalScript(string scriptContent){
 //--------------------------------------------------------------
 void ofxScheme::clearScript(){
     loopIterators.clear();
+}
+
+//--------------------------------------------------------------
+void ofxScheme::setWindowDim(int w, int h){
+    winW = w;
+    winH = h;
 }
 
 //-------------------------------------------------------------- SCHEME DSL LANGUAGE
@@ -118,11 +147,11 @@ SCM ofxScheme::get_mouse_y(){
 
 // ------------------------------------------------------------- Window
 SCM ofxScheme::get_window_width(){
-    return  scm_from_int16( ofGetWindowWidth() );
+    return  scm_from_int16( winW );
 }
 
 SCM ofxScheme::get_window_height(){
-    return  scm_from_int16( ofGetWindowHeight() );
+    return  scm_from_int16( winH );
 }
 
 // ------------------------------------------------------------- Time
@@ -138,7 +167,7 @@ SCM ofxScheme::background(SCM r, SCM g, SCM b){
 
 SCM ofxScheme::background_alpha(SCM r, SCM g, SCM b, SCM a){
     ofSetColor(255 * scm_to_double(r),255 * scm_to_double(g),255 * scm_to_double(b),255 * scm_to_double(a));
-    ofDrawRectangle(0,0,ofGetWindowWidth(),ofGetWindowHeight());
+    ofDrawRectangle(0,0,winW,winH);
     return SCM_UNSPECIFIED;
 }
 
@@ -167,6 +196,16 @@ SCM ofxScheme::pop(){
     return SCM_UNSPECIFIED;
 }
 
+SCM ofxScheme::beginShape(){
+    ofBeginShape();
+    return SCM_UNSPECIFIED;
+}
+
+SCM ofxScheme::endShape(){
+    ofEndShape();
+    return SCM_UNSPECIFIED;
+}
+
 SCM ofxScheme::translate(SCM x, SCM y, SCM z){
     ofTranslate(scm_to_double(x),scm_to_double(y),scm_to_double(z));
     return SCM_UNSPECIFIED;
@@ -184,6 +223,26 @@ SCM ofxScheme::scale(SCM x, SCM y, SCM z){
     return SCM_UNSPECIFIED;
 }
 
+SCM ofxScheme::vertex(SCM x, SCM y, SCM z){
+    ofVertex(scm_to_double(x),scm_to_double(y),scm_to_double(z));
+    return SCM_UNSPECIFIED;
+}
+
+SCM ofxScheme::line(SCM x1, SCM y1, SCM x2, SCM y2, SCM w){
+    ofSetLineWidth(scm_to_int16(w));
+    ofDrawLine(scm_to_double(x1),scm_to_double(y1),scm_to_double(x2),scm_to_double(y2));
+    return SCM_UNSPECIFIED;
+}
+
+SCM ofxScheme::curve(SCM x1, SCM y1, SCM x2, SCM y2,SCM x3, SCM y3, SCM x4, SCM y4){
+    ofDrawCurve(scm_to_double(x1),scm_to_double(y1),scm_to_double(x2),scm_to_double(y2),scm_to_double(x3),scm_to_double(y3),scm_to_double(x4),scm_to_double(y4));
+    return SCM_UNSPECIFIED;
+}
+
+SCM ofxScheme::bezier(SCM x1, SCM y1, SCM x2, SCM y2,SCM x3, SCM y3, SCM x4, SCM y4){
+    ofDrawBezier(scm_to_double(x1),scm_to_double(y1),scm_to_double(x2),scm_to_double(y2),scm_to_double(x3),scm_to_double(y3),scm_to_double(x4),scm_to_double(y4));
+    return SCM_UNSPECIFIED;
+}
 
 SCM ofxScheme::circle(SCM x, SCM y, SCM r, SCM res){
     ofSetCircleResolution(scm_to_int16(res));
@@ -191,10 +250,32 @@ SCM ofxScheme::circle(SCM x, SCM y, SCM r, SCM res){
     return SCM_UNSPECIFIED;
 }
 
+SCM ofxScheme::ellipse(SCM x, SCM y, SCM rx, SCM ry, SCM res){
+    ofSetCircleResolution(scm_to_int16(res));
+    ofDrawEllipse(scm_to_double(x),scm_to_double(y),scm_to_double(rx),scm_to_double(ry));
+    return SCM_UNSPECIFIED;
+}
+
+SCM ofxScheme::rectangle(SCM x, SCM y, SCM w, SCM h, SCM r){
+    ofDrawRectRounded(scm_to_double(x),scm_to_double(y),scm_to_double(w),scm_to_double(h),scm_to_double(r));
+    return SCM_UNSPECIFIED;
+}
+
 SCM ofxScheme::cube(SCM s){
     ofDrawBox(scm_to_double(s));
     return SCM_UNSPECIFIED;
 }
+SCM ofxScheme::sphere(SCM s, SCM res){
+    ofSetSphereResolution(scm_to_int16(res));
+    ofDrawSphere(scm_to_double(s));
+    return SCM_UNSPECIFIED;
+}
+
+SCM ofxScheme::bitmap_string(SCM text, SCM x, SCM y){
+    ofDrawBitmapString(scm_to_latin1_string(text),scm_to_double(x),scm_to_double(y));
+    return SCM_UNSPECIFIED;
+}
+
 
 
 //-------------------------------------------------------------- SCHEME DSL LANGUAGE

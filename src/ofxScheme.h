@@ -47,6 +47,8 @@ public:
     void evalScript(string scriptContent);
     void clearScript();
 
+    void setWindowDim(int w, int h);
+
 
     //---------------------------------------- API
     static SCM loop(SCM index, SCM start, SCM end, SCM increment);
@@ -62,11 +64,22 @@ public:
     static SCM noFill();
     static SCM push();
     static SCM pop();
+    static SCM beginShape();
+    static SCM endShape();
     static SCM translate(SCM x, SCM y, SCM z);
     static SCM rotate(SCM x, SCM y, SCM z);
     static SCM scale(SCM x, SCM y, SCM z);
+    static SCM vertex(SCM x, SCM y, SCM z);
+    static SCM line(SCM x1, SCM y1, SCM x2, SCM y2, SCM w);
+    static SCM curve(SCM x1, SCM y1, SCM x2, SCM y2,SCM x3, SCM y3, SCM x4, SCM y4);
+    static SCM bezier(SCM x1, SCM y1, SCM x2, SCM y2,SCM x3, SCM y3, SCM x4, SCM y4);
     static SCM circle(SCM x, SCM y, SCM r, SCM res);
+    static SCM ellipse(SCM x, SCM y, SCM rx, SCM ry, SCM res);
+    static SCM rectangle(SCM x, SCM y, SCM w, SCM h, SCM r);
     static SCM cube(SCM s);
+    static SCM sphere(SCM s, SCM res);
+    static SCM bitmap_string(SCM text, SCM x, SCM y);
     //---------------------------------------- API
+
 
 };

@@ -12,10 +12,25 @@ void ofApp::setup(){
 
     // init drawing FBO
     fbo = new ofFbo();
-    fbo->allocate(ofGetWindowWidth(),ofGetWindowHeight(),GL_RGBA32F_ARB,4);
+    fbo->allocate(ofGetScreenWidth(),ofGetScreenHeight() ,GL_RGBA32F_ARB,4);
     fbo->begin();
     ofClear(0,0,0,255);
     fbo->end();
+
+    isFullscreen = false;
+    thposX = thposY = thdrawW = thdrawH = 0.0f;
+    scaleTextureToWindow(fbo->getWidth(), fbo->getHeight(), 1280, 720);
+    scheme.setWindowDim(fbo->getWidth(), fbo->getHeight());
+
+    // load editor font
+    ofxEditor::loadFont("fonts/PrintChar21.ttf", 24);
+    hideEditor = false;
+    // load scheme syntax
+    syntax.loadFile("schemeSyntax.xml");
+    editor.getSettings().addSyntax(&syntax);
+    // syntax highlighter colors
+    colorScheme.loadFile("colorScheme.xml");
+    editor.setColorScheme(&colorScheme);
 
     // open default script
     filepath = ofToDataPath("sketch.scm",true);
@@ -39,6 +54,7 @@ void ofApp::update(){
 
 //--------------------------------------------------------------
 void ofApp::draw(){
+    ofBackground(0);
     if(scriptLoaded){
         fbo->begin();
         glPushAttrib(GL_ALL_ATTRIB_BITS);
@@ -47,7 +63,7 @@ void ofApp::draw(){
         ofPushStyle();
         ofPushMatrix();
 
-        scheme.evalScript(sketchContent.getText());
+        scheme.evalScript(editor.getText());
 
         ofPopMatrix();
         ofPopStyle();
@@ -56,13 +72,44 @@ void ofApp::draw(){
         fbo->end();
 
         ofSetColor(255);
-        fbo->draw(0,0,fbo->getWidth(),fbo->getHeight());
+        fbo->draw(thposX,thposY,thdrawW,thdrawH);
+
+        if(!hideEditor) {
+            editor.draw();
+        }
     }
 }
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
+    bool modifierPressed = ofxEditor::getSuperAsModifier() ? ofGetKeyPressed(OF_KEY_SUPER) : ofGetKeyPressed(OF_KEY_CONTROL);
+    if(modifierPressed) {
+        switch(key) {
+        case 'e':
+            scheme.clearScript();
+            return;
+        case 'f':
+            toggleWindowFullscreen();
+            return;
+        case 'l':
+            editor.setLineWrapping(!editor.getLineWrapping());
+            return;
+        case 'n':
+            editor.setLineNumbers(!editor.getLineNumbers());
+            return;
+        case 't':
+            hideEditor = !hideEditor;
+            return;
+        case 'k':
+            editor.setAutoFocus(!editor.getAutoFocus());
+            return;
+        }
+    }
 
+    // send regular key pressed to script if the editor is hidden
+    if(!hideEditor) {
+        editor.keyPressed(key);
+    }
 }
 
 //--------------------------------------------------------------
@@ -92,7 +139,7 @@ void ofApp::mouseReleased(int x, int y, int button){
 
 //--------------------------------------------------------------
 void ofApp::windowResized(int w, int h){
-
+    editor.resize(w, h);
 }
 
 //--------------------------------------------------------------
@@ -132,5 +179,40 @@ void ofApp::loadScript(string scriptFile){
     watcher.removeAllPaths();
     watcher.addPath(scriptFile);
 
+    // open script file into editor
+    editor.openFile(scriptFile);
+
     scriptLoaded = true;
+}
+
+//--------------------------------------------------------------
+void ofApp::scaleTextureToWindow(float texW, float texH, float winW, float winH){
+    // wider texture than window
+    if(texW/texH >= winW/winH){
+        thdrawW           = winW;
+        thdrawH           = (texH*winW) / texW;
+        thposX            = 0;
+        thposY            = (winH-thdrawH)/2.0f;
+        //ofLog(OF_LOG_NOTICE," |wider texture than window|  Window: %fx%f, Texture[%fx%f] drawing %fx%f at %f,%f",winW,winH,texW,texH,thdrawW,thdrawH,thposX,thposY);
+    // wider window than texture
+    }else{
+        thdrawW           = (texW*winH) / texH;
+        thdrawH           = winH;
+        thposX            = (winW-thdrawW)/2.0f;
+        thposY            = 0;
+        //ofLog(OF_LOG_NOTICE," |wider window than texture|  Window: %fx%f, Texture[%fx%f] drawing %fx%f at %f,%f",winW,winH,texW,texH,thdrawW,thdrawH,thposX,thposY);
+    }
+
+}
+
+//--------------------------------------------------------------
+void ofApp::toggleWindowFullscreen(){
+    isFullscreen = !isFullscreen;
+    ofToggleFullscreen();
+
+    if(!isFullscreen){
+        scaleTextureToWindow(fbo->getWidth(), fbo->getHeight(), 1280,720);
+    }else{
+        scaleTextureToWindow(fbo->getWidth(), fbo->getHeight(), ofGetScreenWidth(),ofGetScreenHeight());
+    }
 }

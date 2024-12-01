@@ -19,7 +19,7 @@ Project{
         ]
 
         of.addons: [
-            'ofxScheme'
+            'ofxGLEditor','ofxImGui','ofxScheme'
         ]
 
         // additional flags for the project. the of module sets some
