@@ -4,7 +4,7 @@
 #include "PathWatcher.h"
 
 #include "ofxScheme.h"
-#include "ofxEditor.h"
+#include "ofxGLEditor.h"
 #include "ofxImGui.h"
 
 // this is a simple live coding example using ofxScheme with
@@ -30,7 +30,7 @@
 // see ofxGLEditor.h for editor key commands
 //
 
-class ofApp : public ofBaseApp{
+class ofApp : public ofBaseApp, public ofxGLEditorListener{
 
 public:
     void setup();
@@ -62,9 +62,9 @@ public:
     bool                eval;
     float               thposX, thposY, thdrawW, thdrawH;
 
-    ofxEditor editor;
-    ofxEditorSyntax syntax;
-    ofxEditorColorScheme colorScheme;
+    ofxGLEditor             editor;
+    ofxEditorSyntax         syntax;
+    ofxEditorColorScheme    colorScheme;
     bool hideEditor;
 
     ofxImGui::Gui       gui;

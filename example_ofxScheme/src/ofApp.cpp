@@ -24,13 +24,15 @@ void ofApp::setup(){
 
     // load editor font
     ofxEditor::loadFont("fonts/PrintChar21.ttf", 24);
+    editor.setup(this);
+
     hideEditor = false;
     // load scheme syntax
     syntax.loadFile("schemeSyntax.xml");
     editor.getSettings().addSyntax(&syntax);
     // syntax highlighter colors
-    //colorScheme.loadFile("colorScheme.xml");
-    //editor.setColorScheme(&colorScheme);
+    colorScheme.loadFile("colorScheme.xml");
+    editor.setColorScheme(&colorScheme);
 
     // open default script
     filepath = ofToDataPath("sketch.scm",true);
@@ -114,6 +116,7 @@ void ofApp::keyPressed(int key){
         case 'k':
             editor.setAutoFocus(!editor.getAutoFocus());
             return;
+
         }
     }
 
@@ -192,7 +195,7 @@ void ofApp::loadScript(string scriptFile){
     watcher.addPath(scriptFile);
 
     // open script file into editor
-    editor.openFile(scriptFile);
+    editor.openFile(scriptFile,1);
 
     scriptLoaded = true;
 }
