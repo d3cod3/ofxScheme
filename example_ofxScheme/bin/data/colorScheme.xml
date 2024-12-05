@@ -1,27 +1,39 @@
 <!-- css colors http://www.w3schools.com/cssref/css_colornames.asp -->
 <colorscheme>
 	<text>
-		<hex>E6E2E0</hex>
+		<gray>255</gray>
 	</text>
 	<string>
-		<hex>FFFF00</hex>
+		<r>0</r>
+		<g>128</g>
+		<b>0</b>
 	</string>
 	<number>
-		<hex>DF5320</hex>
+		<gray>255</gray>
 	</number>
 	<comment>
-		<hex>766E6B</hex>
+		<r>120</r>
+		<g>128</g>
+		<b>120</b>
 	</comment>
 	<preprocessor>
-		<hex>E6E2E0</hex>
+		<r>230</r>
+		<g>121</g>
+		<b>57</b>
 	</preprocessor>
 	<keyword>
-		<hex>29A329</hex>
+		<r>246</r>
+		<g>70</g>
+		<b>185</b>
 	</keyword>
 	<typename>
-		<hex>E6E2E0</hex>
+		<r>246</r>
+		<g>70</g>
+		<b>185</b>
 	</typename>
 	<function>
-		<hex>E619C3</hex>
+		<r>11</r>
+		<g>179</g>
+		<b>244</b>
 	</function>
 </colorscheme>
