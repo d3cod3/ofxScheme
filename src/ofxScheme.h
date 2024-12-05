@@ -44,19 +44,27 @@ public:
     ~ofxScheme();
 
     void setup();
+    void update();
     void evalScript(string scriptContent);
     void clearScript();
 
     void setWindowDim(int w, int h);
+    void setMouse(float x, float y);
+    void setScriptPath(string abspath);
 
 
     //---------------------------------------- API
+    // structure
     static SCM loop(SCM index, SCM start, SCM end, SCM increment);
+    // Mouse
     static SCM get_mouse_x();
     static SCM get_mouse_y();
+    // Window
     static SCM get_window_width();
     static SCM get_window_height();
+    // Time
     static SCM get_time();
+    // Graphics
     static SCM background(SCM r, SCM g, SCM b);
     static SCM background_alpha(SCM r, SCM g, SCM b, SCM a);
     static SCM set_color(SCM r, SCM g, SCM b, SCM a);
@@ -73,12 +81,33 @@ public:
     static SCM line(SCM x1, SCM y1, SCM x2, SCM y2, SCM w);
     static SCM curve(SCM x1, SCM y1, SCM x2, SCM y2,SCM x3, SCM y3, SCM x4, SCM y4);
     static SCM bezier(SCM x1, SCM y1, SCM x2, SCM y2,SCM x3, SCM y3, SCM x4, SCM y4);
+    static SCM lineWidth(SCM lw);
+    static SCM curveRes(SCM cr);
     static SCM circle(SCM x, SCM y, SCM r, SCM res);
     static SCM ellipse(SCM x, SCM y, SCM rx, SCM ry, SCM res);
     static SCM rectangle(SCM x, SCM y, SCM w, SCM h, SCM r);
-    static SCM cube(SCM s);
+    static SCM triangle(SCM x1, SCM y1, SCM x2, SCM y2, SCM x3, SCM y3);
+    static SCM cube(SCM s, SCM res);
+    static SCM cone(SCM x, SCM y, SCM z, SCM r, SCM h, SCM rSeg, SCM hSeg);
+    static SCM cylinder(SCM x, SCM y, SCM z, SCM r, SCM h, SCM rSeg, SCM hSeg);
+    static SCM plane(SCM x, SCM y, SCM z, SCM w, SCM h, SCM resX, SCM resY);
     static SCM sphere(SCM s, SCM res);
-    static SCM bitmap_string(SCM text, SCM x, SCM y);
+    static SCM bitmap_string(SCM text, SCM x, SCM y, SCM font, SCM fontsize);
+    // Math
+    static SCM clamp(SCM v, SCM min, SCM max);
+    static SCM degToRad(SCM deg);
+    static SCM radToDeg(SCM rad);
+    static SCM dist(SCM x1, SCM y1, SCM z1, SCM x2, SCM y2, SCM z2);
+    static SCM lerp(SCM start, SCM stop, SCM amnt);
+    static SCM map(SCM v, SCM imin, SCM imax, SCM omin, SCM omax);
+    static SCM noise(SCM x, SCM y, SCM z);
+    // ofImage
+    static SCM image(SCM index, SCM path, SCM x, SCM y, SCM w, SCM h);
+    // ofVideoPlayer
+    static SCM video(SCM index, SCM path, SCM x, SCM y, SCM w, SCM h);
+    // oVideofGrabber
+    static SCM grabber(SCM index, SCM x, SCM y, SCM w, SCM h);
+
     //---------------------------------------- API
 
 

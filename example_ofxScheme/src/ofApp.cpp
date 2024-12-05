@@ -29,22 +29,32 @@ void ofApp::setup(){
     syntax.loadFile("schemeSyntax.xml");
     editor.getSettings().addSyntax(&syntax);
     // syntax highlighter colors
-    colorScheme.loadFile("colorScheme.xml");
-    editor.setColorScheme(&colorScheme);
+    //colorScheme.loadFile("colorScheme.xml");
+    //editor.setColorScheme(&colorScheme);
 
     // open default script
     filepath = ofToDataPath("sketch.scm",true);
     watcher.start();
     needToLoadScript = true;
     scriptLoaded = false;
+
+    eval = true;
 }
 
 //--------------------------------------------------------------
 void ofApp::update(){
 
+    scheme.setMouse((ofGetMouseX() - thposX)/thdrawW * fbo->getWidth(),(ofGetMouseY() - thposY)/thdrawH * fbo->getHeight());
+    scheme.update();
+
     if(needToLoadScript){
         needToLoadScript = false;
         loadScript(filepath);
+    }
+
+    if(eval){
+        eval = false;
+        scriptBuffer = editor.getText();
     }
 
     while(watcher.waitingEvents()) {
@@ -63,7 +73,7 @@ void ofApp::draw(){
         ofPushStyle();
         ofPushMatrix();
 
-        scheme.evalScript(editor.getText());
+        scheme.evalScript(scriptBuffer);
 
         ofPopMatrix();
         ofPopStyle();
@@ -87,6 +97,7 @@ void ofApp::keyPressed(int key){
         switch(key) {
         case 'e':
             scheme.clearScript();
+            eval = true;
             return;
         case 'f':
             toggleWindowFullscreen();
@@ -172,6 +183,7 @@ void ofApp::pathChanged(const PathWatcher::Event &event) {
 void ofApp::loadScript(string scriptFile){
 
     scheme.clearScript();
+    scheme.setScriptPath(scriptFile);
 
     currentScriptFile.open(scriptFile);
     sketchContent = ofBufferFromFile(currentScriptFile.getAbsolutePath());

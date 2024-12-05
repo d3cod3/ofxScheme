@@ -13,8 +13,8 @@
 (push)
 (translate (/ (OUTPUT_WIDTH) 2) (/ (OUTPUT_HEIGHT) 2) 0)
 (rotate 0 (* 30 (sin (/ (time) 1000))) (* 120 (cos (/ (time) 1000))))
-(draw-cube (* (OUTPUT_HEIGHT) (sin (/ (time) 10000))))
+(draw-cube (* (OUTPUT_HEIGHT) (sin (/ (time) 10000))) 1)
 (pop)
 
-;(draw-circle (random (OUTPUT_WIDTH)) (random (OUTPUT_HEIGHT)) (loop 0 0 200 3) 6)
-;(draw-circle (MOUSE_X) (MOUSE_Y) (loop 1 0 200 3) 6)
+;(draw-circle (random (OUTPUT_WIDTH)) (random (OUTPUT_HEIGHT)) (loop 51 0 200 3) 6)
+;(draw-circle (MOUSE_X) (MOUSE_Y) (loop 52 0 200 3) 6)

@@ -56,8 +56,10 @@ public:
     void toggleWindowFullscreen();
 
     ofxScheme           scheme;
+    std::string         scriptBuffer;
     ofFbo               *fbo;
     bool                isFullscreen;
+    bool                eval;
     float               thposX, thposY, thdrawW, thdrawH;
 
     ofxEditor editor;
