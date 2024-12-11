@@ -245,14 +245,40 @@
         <function>background-alpha</function>
         <function>set-color</function>
         <function>fill</function>
-        <function>noFill</function>
+        <function>no-fill</function>
         <function>push</function>
         <function>pop</function>
+        <function>begin-shape</function>
+        <function>end-shape</function>
         <function>translate</function>
         <function>rotate</function>
         <function>scale</function>
+        <function>line-width</function>
+        <function>curve-res</function>
+        <function>draw-vertex</function>
+        <function>draw-line</function>
+        <function>draw-curve</function>
+        <function>draw-bezier</function>
         <function>draw-circle</function>
+        <function>draw-ellipse</function>
+        <function>draw-rectangle</function>
+        <function>draw-triangle</function>
         <function>draw-cube</function>
+        <function>draw-cone</function>
+        <function>draw-cylinder</function>
+        <function>draw-plane</function>
+        <function>draw-sphere</function>
+        <function>draw-string</function>
+        <function>clamp</function>
+        <function>deg-to-rad</function>
+        <function>rad-to-deg</function>
+        <function>dist</function>
+        <function>lerp</function>
+        <function>map</function>
+        <function>noise</function>
+        <function>draw-image</function>
+        <function>draw-video</function>
+        <function>draw-camera</function>
 
     </words>
 </syntax>

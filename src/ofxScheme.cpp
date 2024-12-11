@@ -53,9 +53,9 @@ void* register_functions(void* data){
     // Graphics
     scm_c_define_gsubr("background", 3, 0, 0, (scm_t_subr)(&ofxScheme::background));
     scm_c_define_gsubr("background-alpha", 4, 0, 0, (scm_t_subr)(&ofxScheme::background_alpha));
-    scm_c_define_gsubr("set-color", 4, 0, 0, (scm_t_subr)(&ofxScheme::set_color));
+    scm_c_define_gsubr("set-color", 3, 1, 0, (scm_t_subr)(&ofxScheme::set_color));
     scm_c_define_gsubr("fill", 0, 0, 0, (scm_t_subr)(&ofxScheme::fill));
-    scm_c_define_gsubr("noFill", 0, 0, 0, (scm_t_subr)(&ofxScheme::noFill));
+    scm_c_define_gsubr("no-fill", 0, 0, 0, (scm_t_subr)(&ofxScheme::noFill));
 
     scm_c_define_gsubr("push", 0, 0, 0, (scm_t_subr)(&ofxScheme::push));
     scm_c_define_gsubr("pop", 0, 0, 0, (scm_t_subr)(&ofxScheme::pop));
@@ -69,7 +69,7 @@ void* register_functions(void* data){
     scm_c_define_gsubr("curve-res", 1, 0, 0, (scm_t_subr)(&ofxScheme::curveRes));
 
     scm_c_define_gsubr("draw-vertex", 3, 0, 0, (scm_t_subr)(&ofxScheme::vertex));
-    scm_c_define_gsubr("draw-line", 5, 0, 0, (scm_t_subr)(&ofxScheme::line));
+    scm_c_define_gsubr("draw-line", 4, 1, 0, (scm_t_subr)(&ofxScheme::line));
     scm_c_define_gsubr("draw-curve", 8, 0, 0, (scm_t_subr)(&ofxScheme::curve));
     scm_c_define_gsubr("draw-bezier", 8, 0, 0, (scm_t_subr)(&ofxScheme::bezier));
     scm_c_define_gsubr("draw-circle", 4, 0, 0, (scm_t_subr)(&ofxScheme::circle));
@@ -125,7 +125,7 @@ ofxScheme::ofxScheme(){
 
 //--------------------------------------------------------------
 ofxScheme::~ofxScheme(){
-
+    //scm_close();
 }
 
 //--------------------------------------------------------------
@@ -153,8 +153,8 @@ void ofxScheme::update(){
 }
 
 //--------------------------------------------------------------
-void ofxScheme::evalScript(string scriptContent){
-    gdbscm_safe_eval_string(scriptContent.c_str());
+const char* ofxScheme::evalScript(string scriptContent){
+    return gdbscm_safe_eval_string(scriptContent.c_str());
     //scm_c_eval_string(scriptContent.c_str());
 }
 
@@ -243,7 +243,12 @@ SCM ofxScheme::background_alpha(SCM r, SCM g, SCM b, SCM a){
 }
 
 SCM ofxScheme::set_color(SCM r, SCM g, SCM b, SCM a){
-    ofSetColor(255 * scm_to_double(r),255 * scm_to_double(g),255 * scm_to_double(b),255 * scm_to_double(a));
+    if (scm_is_eq (a, SCM_UNDEFINED)){
+        ofSetColor(255 * scm_to_double(r),255 * scm_to_double(g),255 * scm_to_double(b),255);
+    }else{
+        ofSetColor(255 * scm_to_double(r),255 * scm_to_double(g),255 * scm_to_double(b),255 * scm_to_double(a));
+    }
+
     return SCM_UNSPECIFIED;
 }
 
@@ -300,7 +305,11 @@ SCM ofxScheme::vertex(SCM x, SCM y, SCM z){
 }
 
 SCM ofxScheme::line(SCM x1, SCM y1, SCM x2, SCM y2, SCM w){
-    ofSetLineWidth(scm_to_int16(w));
+    if (scm_is_eq (w, SCM_UNDEFINED)){
+        ofSetLineWidth(1);
+    }else{
+        ofSetLineWidth(scm_to_int16(w));
+    }
     ofDrawLine(scm_to_double(x1),scm_to_double(y1),scm_to_double(x2),scm_to_double(y2));
     return SCM_UNSPECIFIED;
 }
@@ -338,7 +347,12 @@ SCM ofxScheme::ellipse(SCM x, SCM y, SCM rx, SCM ry, SCM res){
 }
 
 SCM ofxScheme::rectangle(SCM x, SCM y, SCM w, SCM h, SCM r){
-    ofDrawRectRounded(scm_to_double(x),scm_to_double(y),scm_to_double(w),scm_to_double(h),scm_to_double(r));
+    if (scm_is_eq (r, SCM_UNDEFINED)){
+        ofDrawRectangle(scm_to_double(x),scm_to_double(y),scm_to_double(w),scm_to_double(h));
+    }else{
+        ofDrawRectRounded(scm_to_double(x),scm_to_double(y),scm_to_double(w),scm_to_double(h),scm_to_double(r));
+    }
+
     return SCM_UNSPECIFIED;
 }
 

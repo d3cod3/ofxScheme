@@ -4,10 +4,10 @@
     (draw-circle (* (OUTPUT_WIDTH) (cos (/ (time) (* 1000 n)))) (/ (OUTPUT_HEIGHT) 2) (loop n 0 (* (random n) n) 1) 6)
     (render (- n 1)))))
 
-(background-alpha 0.04 0.71 0.9 0.01)
-(set-color 0.0 0.1 0.15 0.3)
+(background-alpha 0.04 0.1 0.09 0.01)
+(set-color 1.0 0.9 0.85 0.3)
 
-(noFill)
+(no-fill)
 (render 50)
 
 (push)

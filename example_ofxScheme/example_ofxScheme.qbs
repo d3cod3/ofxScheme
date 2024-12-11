@@ -16,6 +16,10 @@ Project{
             'src/main.cpp',
             'src/ofApp.cpp',
             'src/ofApp.h',
+            'src/MosaicTheme.cpp',
+            'src/MosaicTheme.h',
+            'src/TextEditor.cpp',
+            'src/TextEditor.h',
         ]
 
         of.addons: [

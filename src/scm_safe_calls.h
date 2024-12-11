@@ -119,8 +119,8 @@ scscm_eval_scheme_string (void *datap)
   return NULL;
 }
 /* Safe Evaluate EXPR in the Guile interpreter. */
-void gdbscm_safe_eval_string (const char *string, int display_result=0)
+const char * gdbscm_safe_eval_string (const char *string, int display_result=0)
 {
   struct eval_scheme_string_data data = { string, display_result };
-  gdbscm_with_guile (scscm_eval_scheme_string, (void *) &data);
+  return gdbscm_with_guile (scscm_eval_scheme_string, (void *) &data);
 }

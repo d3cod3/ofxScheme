@@ -45,7 +45,7 @@ public:
 
     void setup();
     void update();
-    void evalScript(string scriptContent);
+    const char* evalScript(string scriptContent);
     void clearScript();
 
     void setWindowDim(int w, int h);

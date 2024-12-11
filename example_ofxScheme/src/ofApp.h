@@ -2,15 +2,16 @@
 
 #include "ofMain.h"
 #include "PathWatcher.h"
+#include "MosaicTheme.h"
 
 #include "ofxScheme.h"
 #include "ofxGLEditor.h"
 #include "ofxImGui.h"
 
-// this is a simple live coding example using ofxScheme with
+// this is a simple live coding example using ofxScheme with ofxGLEditor
 //
 // app key commands:
-//    MOD -> CTRL or Super (Windows Key, Mac CMD)
+// MOD -> CTRL
 //
 // MOD + e: execute script or selected text
 // MOD + l: toggle line wrapping
@@ -36,6 +37,7 @@ public:
     void setup();
     void update();
     void draw();
+    void drawGUI();
 
     void keyPressed(int key);
     void keyReleased(int key);
@@ -47,10 +49,22 @@ public:
     void windowResized(int w, int h);
     void dragEvent(ofDragInfo dragInfo);
 
+    /// ofxGLEditor events
+    void saveFileEvent(int &whichEditor);
+    void openFileEvent(int &whichEditor);
+    void executeScriptEvent(int &whichEditor);
+    void evalReplEvent(const string &text);
+
     // Filepath watcher callback
     void pathChanged(const PathWatcher::Event &event);
 
     void loadScript(string scriptFile);
+
+    // Console
+    void            setupCommands();
+    void            sendCommand(string &command);
+    string          getCommandMatch(string text);
+    bool            containString(string str1, string str2);
 
     void scaleTextureToWindow(float texW, float texH, float winW, float winH);
     void toggleWindowFullscreen();
@@ -60,6 +74,7 @@ public:
     ofFbo               *fbo;
     bool                isFullscreen;
     bool                eval;
+    bool                scriptError;
     float               thposX, thposY, thdrawW, thdrawH;
 
     ofxGLEditor             editor;
@@ -67,7 +82,14 @@ public:
     ofxEditorColorScheme    colorScheme;
     bool hideEditor;
 
-    ofxImGui::Gui       gui;
+    ofxImGui::Gui                       gui;
+    MosaicTheme                         *mainTheme;
+    ofDirectory                         scriptFolder;
+    shared_ptr<MosaicLoggerChannel>     mosaicLoggerChannel;
+    vector<MosaicCommand>               commandsList;
+    vector<string>                      ofxSchemeAPI;
+    vector<string>                      ofxSchemeAPIDesc;
+    bool                                showGUI;
 
     PathWatcher         watcher;
     ofFile              currentScriptFile;
