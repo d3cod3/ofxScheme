@@ -6,6 +6,7 @@ void ofApp::setup(){
     ofSetFrameRate(60);
     ofSetVerticalSync(false);
     ofEnableAntiAliasing();
+    ofSetEscapeQuitsApp(false);
 
     // INIT Scheme and register API
     scheme.setup();
@@ -28,11 +29,16 @@ void ofApp::setup(){
 
     hideEditor = false;
     // load scheme syntax
-    syntax.loadFile("schemeSyntax.xml");
-    editor.getSettings().addSyntax(&syntax);
+    syntax = new ofxEditorSyntax();
+    syntax->loadFile("schemeSyntax.xml");
+    editor.getSettings().addSyntax("Scheme", syntax);
+    for(size_t i =0;i<=9;i++){
+        editor.setLangSyntax("Scheme",i);
+    }
     // syntax highlighter colors
     colorScheme.loadFile("colorScheme.xml");
     editor.setColorScheme(&colorScheme);
+    cursorColor = ofColor(255, 255, 0, 200);
 
     ofxSchemeAPI = {"loop","MOUSE_X","MOUSE_Y","OUTPUT_WIDTH","OUTPUT_HEIGHT",
                     "background","background-alpha","set-color","fill","no-fill",
@@ -88,8 +94,6 @@ void ofApp::setup(){
     ofxSchemeAPIDesc[42] = "(draw-camera index path x y w h)  -->  draw camera with specified index ( check console ), at specified position with specified dimensions";
 
     // open default script
-    filepath = ofToDataPath("sketch.scm",true);
-    watcher.start();
     needToLoadScript = true;
     scriptLoaded = false;
 
@@ -123,7 +127,7 @@ void ofApp::update(){
 
     if(needToLoadScript){
         needToLoadScript = false;
-        loadScript(filepath);
+        loadBuffers();
     }
 
     if(eval){
@@ -131,9 +135,6 @@ void ofApp::update(){
         scriptBuffer = editor.getText();
     }
 
-    while(watcher.waitingEvents()) {
-        pathChanged(watcher.nextEvent());
-    }
 }
 
 //--------------------------------------------------------------
@@ -152,6 +153,7 @@ void ofApp::draw(){
             if(res != nullptr){
                 scriptError = true;
                 ofLog(OF_LOG_ERROR,"%s",res);
+                editor.getSettings().setCursorColor(ofColor::red);
             }
         }
 
@@ -200,10 +202,18 @@ void ofApp::keyPressed(int key){
     bool modifierPressed = ofxEditor::getSuperAsModifier() ? ofGetKeyPressed(OF_KEY_SUPER) : ofGetKeyPressed(OF_KEY_CONTROL);
     if(modifierPressed) {
         switch(key) {
+        case 'o':
+            // TODO
+            return;
+        case 's':
+            filepath = ofToDataPath(ofToString(editor.getCurrentEditor())+".scm",true);
+            editor.saveFile(filepath,editor.getCurrentEditor());
+            return;
         case 'e':
             scheme.clearScript();
             eval = true;
             scriptError = false;
+            editor.getSettings().setCursorColor(cursorColor);
             return;
         case 'f':
             toggleWindowFullscreen();
@@ -303,65 +313,22 @@ void ofApp::saveFileEvent(int &whichEditor) {
 }
 
 //--------------------------------------------------------------
-void ofApp::executeScriptEvent(int &whichEditor) {
-    // received on editor CTRL/Super + e
+void ofApp::loadBuffers(){
 
-    // get the text buffer with:
-    // string txt = editor.getText(whichEditor);
-    // note: returns only the selected area when holding SHIFT + arrow keys
-
-    // if you have some scripting language (e.g. ofxLua)
-    ofLog(OF_LOG_NOTICE,"received execute script event for editor %i",whichEditor);
-}
-
-//--------------------------------------------------------------
-void ofApp::evalReplEvent(const string &text) {
-    ofLog(OF_LOG_NOTICE,"received eval repl event: %s",text.c_str());
-
-    // make sure there is a response since this triggers printing the
-    // next conosle prompt
-    //editor.evalReplReturn("did something"); // print this, then prompt
-    //editor.evalReplReturn(); // empty response, just prints prompt
-}
-
-//--------------------------------------------------------------
-void ofApp::pathChanged(const PathWatcher::Event &event) {
-    switch(event.change) {
-    case PathWatcher::CREATED:
-        //ofLogVerbose(PACKAGE) << "path created " << event.path;
-        break;
-    case PathWatcher::MODIFIED:
-        //ofLogVerbose(PACKAGE) << "path modified " << event.path;
-        filepath = event.path;
-        needToLoadScript = true;
-        scriptLoaded = false;
-        break;
-    case PathWatcher::DELETED:
-        //ofLogVerbose(PACKAGE) << "path deleted " << event.path;
-        return;
-    default: // NONE
-        return;
+    for(size_t i =0;i<=9;i++){
+        filepath = ofToDataPath(ofToString(i)+".scm",true);
+        if(i == 0){
+            ofFile temp(filepath);
+            string filesFolder = temp.getEnclosingDirectory()+"/files";
+            scriptFolder.listDir(filesFolder);
+            scheme.clearScript();
+            scheme.setScriptPath(scriptFolder.getAbsolutePath());
+            currentScriptFile.open(filepath);
+            sketchContent = ofBufferFromFile(currentScriptFile.getAbsolutePath());
+        }
+        // open script files into editor buffers
+        editor.openFile(filepath,i);
     }
-
-}
-
-//--------------------------------------------------------------
-void ofApp::loadScript(string scriptFile){
-
-    ofFile temp(scriptFile);
-    scriptFolder.listDir(temp.getEnclosingDirectory());
-
-    scheme.clearScript();
-    scheme.setScriptPath(scriptFile);
-
-    currentScriptFile.open(scriptFile);
-    sketchContent = ofBufferFromFile(currentScriptFile.getAbsolutePath());
-
-    watcher.removeAllPaths();
-    watcher.addPath(scriptFile);
-
-    // open script file into editor
-    editor.openFile(scriptFile,1);
 
     scriptLoaded = true;
 }
@@ -377,12 +344,14 @@ void ofApp::setupCommands(){
     index = ofxSchemeAPI.size();
     commandsList[index].command = "help";
     commandsList[index].description = "Print the list with all available commands";
-    commandsList[index+1].command = "listfiles";
+    commandsList[index+1].command = "list_files";
     commandsList[index+1].description = "List all files in script folder";
-    commandsList[index+2].command = "apimethods";
+    commandsList[index+2].command = "api_methods";
     commandsList[index+2].description = "List all OF scheme live-coding methods";
-    commandsList[index+3].command = "exit";
-    commandsList[index+3].description = "Quit Scheme Live Coding";
+    commandsList[index+3].command = "random_example";
+    commandsList[index+3].description = "Load and run a random example";
+    commandsList[index+4].command = "exit";
+    commandsList[index+4].description = "Quit Scheme Live Coding";
 }
 
 //--------------------------------------------------------------
@@ -401,14 +370,14 @@ void ofApp::sendCommand(string &command){
     // run command
     if(command == "help"){
         ofLog(OF_LOG_NOTICE,"%s","-- The list of all available commands");
-        for(size_t i=0;i<commandsList.size();i++){
+        for(size_t i=ofxSchemeAPI.size();i<commandsList.size();i++){
             if(commandsList[i].command != ""){
                 ofLog(OF_LOG_NOTICE,"%s - %s",commandsList[i].command.c_str(),commandsList[i].description.c_str());
             }
         }
-    }else if(command == "listfiles"){
+    }else if(command == "list_files"){
         if(scriptFolder.getFiles().size() > 0){
-            ofLog(OF_LOG_NOTICE,"%s","-- The list of files inside patch Data/ folder");
+            ofLog(OF_LOG_NOTICE,"%s","-- The list of files inside scheme live-coding files/ folder");
             for(size_t i=0;i<scriptFolder.getFiles().size();i++){
                 if(scriptFolder.getFile(i).isDirectory()){
                     ofLog(OF_LOG_NOTICE,"%s/",scriptFolder.getFile(i).getFileName().c_str());
@@ -417,10 +386,10 @@ void ofApp::sendCommand(string &command){
                 }
             }
         }else{
-            ofLog(OF_LOG_NOTICE,"%s","Patch Data/ folder is empty");
+            ofLog(OF_LOG_NOTICE,"%s","scheme live-coding files/ folder is empty");
         }
 
-    }else if(command == "apimethods"){
+    }else if(command == "api_methods"){
         ofLog(OF_LOG_NOTICE,"%s","-- The List all OF scheme live-coding methods");
         string temp = "\n\n";
         for(size_t i=0;i<ofxSchemeAPI.size();i++){
@@ -433,6 +402,22 @@ void ofApp::sendCommand(string &command){
             }
         }
         ofLog(OF_LOG_NOTICE,"%s\n",temp.c_str());
+    }else if(command == "random_example"){
+        scheme.clearScript();
+        ofDirectory temp;
+        temp.listDir(ofToDataPath("examples/"));
+
+        // TODO, add more examples and choose a random one
+        currentScriptFile.open(temp.getFile(0).getAbsolutePath());
+
+        sketchContent = ofBufferFromFile(currentScriptFile.getAbsolutePath());
+        editor.openFile(temp.getFile(0).getAbsolutePath(),editor.getCurrentEditor());
+        eval = true;
+        scriptError = false;
+        editor.getSettings().setCursorColor(cursorColor);
+
+        ofLog(OF_LOG_NOTICE,"Loaded random example: %s",temp.getFile(0).getFileName().c_str());
+
     }else if(command == "exit"){
         scheme.clearScript();
         scheme.evalScript("");
@@ -490,6 +475,5 @@ void ofApp::toggleWindowFullscreen(){
         scaleTextureToWindow(fbo->getWidth(), fbo->getHeight(), ofGetScreenWidth(),ofGetScreenHeight());
         editor.resize(ofGetScreenWidth(),ofGetScreenHeight());
     }
-
 
 }

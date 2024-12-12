@@ -182,7 +182,9 @@ void ofxScheme::setMouse(float x, float y){
 //--------------------------------------------------------------
 void ofxScheme::setScriptPath(string abspath){
     ofFile tempFileScript(abspath);
-    scriptPath = tempFileScript.getEnclosingDirectory().substr(0,tempFileScript.getEnclosingDirectory().size());
+    //scriptPath = tempFileScript.getEnclosingDirectory().substr(0,tempFileScript.getEnclosingDirectory().size());
+    scriptPath = abspath+"/";
+    ofLog(OF_LOG_NOTICE,"Live coding files folder set to: %s",scriptPath.c_str());
 }
 
 //-------------------------------------------------------------- SCHEME DSL LANGUAGE

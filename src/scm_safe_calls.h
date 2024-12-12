@@ -14,7 +14,6 @@
 
 #include <libguile.h>
 
-
 /* Struct to marshall args to scscm_safe_call_body.  */
 struct c_data
 {

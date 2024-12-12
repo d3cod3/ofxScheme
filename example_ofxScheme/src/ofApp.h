@@ -49,16 +49,11 @@ public:
     void windowResized(int w, int h);
     void dragEvent(ofDragInfo dragInfo);
 
-    /// ofxGLEditor events
+    // ofxGLEditor events
     void saveFileEvent(int &whichEditor);
     void openFileEvent(int &whichEditor);
-    void executeScriptEvent(int &whichEditor);
-    void evalReplEvent(const string &text);
 
-    // Filepath watcher callback
-    void pathChanged(const PathWatcher::Event &event);
-
-    void loadScript(string scriptFile);
+    void loadBuffers();
 
     // Console
     void            setupCommands();
@@ -78,8 +73,9 @@ public:
     float               thposX, thposY, thdrawW, thdrawH;
 
     ofxGLEditor             editor;
-    ofxEditorSyntax         syntax;
+    ofxEditorSyntax*        syntax;
     ofxEditorColorScheme    colorScheme;
+    ofColor                 cursorColor;
     bool hideEditor;
 
     ofxImGui::Gui                       gui;
@@ -91,7 +87,6 @@ public:
     vector<string>                      ofxSchemeAPIDesc;
     bool                                showGUI;
 
-    PathWatcher         watcher;
     ofFile              currentScriptFile;
     ofBuffer            sketchContent;
     string              filepath;

@@ -1,3 +1,6 @@
+; Scheme live-coding OF powered by n3m3da
+; (CC)Cleft 2024
+
 (define (render n)
   (cond
     ((> n 0)
