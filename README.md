@@ -1,7 +1,7 @@
 # ofxScheme
 A Scheme DSL live-coding embedded interface for openFrameworks
 
-![ofxScheme](https://github.com/d3cod3/ofxScheme/raw/master/img/firsttry.jpeg)
+![ofxScheme](https://github.com/d3cod3/ofxScheme/raw/master/img/scheme_livecoding_2024.png)
 
 ## COMPILE
 
