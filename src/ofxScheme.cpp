@@ -101,6 +101,9 @@ void* register_functions(void* data){
     // oVideofGrabber
     scm_c_define_gsubr("draw-camera", 5, 0, 0, (scm_t_subr)(&ofxScheme::grabber));
 
+    // Screen
+    scm_c_define_gsubr("draw-screen", 4, 0, 0, (scm_t_subr)(&ofxScheme::outputTexture));
+
     return NULL;
 }
 //--------------------------------------------------------------
@@ -117,6 +120,8 @@ std::map<int,ofVideoPlayer>     videos;
 std::map<int,ofVideoGrabber>    cams;
 std::map<string,ofTrueTypeFont> fonts;
 
+ofTexture                       screenTexture;
+
 
 //--------------------------------------------------------------
 ofxScheme::ofxScheme(){
@@ -125,7 +130,7 @@ ofxScheme::ofxScheme(){
 
 //--------------------------------------------------------------
 ofxScheme::~ofxScheme(){
-    //scm_close();
+
 }
 
 //--------------------------------------------------------------
@@ -133,6 +138,8 @@ void ofxScheme::setup(){
   scm_with_guile(&register_functions, NULL);
 
   setWindowDim(1280,720);
+
+  screenTexture.allocate(ofGetScreenWidth(),ofGetScreenHeight(),GL_RGBA);
 }
 
 //--------------------------------------------------------------
@@ -185,6 +192,11 @@ void ofxScheme::setScriptPath(string abspath){
     //scriptPath = tempFileScript.getEnclosingDirectory().substr(0,tempFileScript.getEnclosingDirectory().size());
     scriptPath = abspath+"/";
     ofLog(OF_LOG_NOTICE,"Live coding files folder set to: %s",scriptPath.c_str());
+}
+
+//--------------------------------------------------------------
+void ofxScheme::setScreenTexture(ofTexture tex){
+    screenTexture = tex;
 }
 
 //-------------------------------------------------------------- SCHEME DSL LANGUAGE
@@ -500,6 +512,13 @@ SCM ofxScheme::grabber(SCM index, SCM x, SCM y, SCM w, SCM h){
     }else{
         cams[scm_to_int16(index)].draw(scm_to_double(x),scm_to_double(y),scm_to_double(w),scm_to_double(h));
     }
+
+    return SCM_UNSPECIFIED;
+}
+
+// ------------------------------------------------------------- Screen
+SCM ofxScheme::outputTexture(SCM x, SCM y, SCM w, SCM h){
+    screenTexture.draw(scm_to_double(x),scm_to_double(y),scm_to_double(w),scm_to_double(h));
 
     return SCM_UNSPECIFIED;
 }

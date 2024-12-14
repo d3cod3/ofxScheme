@@ -279,6 +279,7 @@
         <function>draw-image</function>
         <function>draw-video</function>
         <function>draw-camera</function>
+        <function>draw-screen</function>
 
     </words>
 </syntax>

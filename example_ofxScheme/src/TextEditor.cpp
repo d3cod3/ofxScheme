@@ -4046,7 +4046,7 @@ const TextEditor::LanguageDefinition& TextEditor::LanguageDefinition::SimpleCons
             "draw-bezier","draw-circle","draw-ellipse","draw-rectangle",
             "draw-triangle","draw-cube","draw-cone","draw-cylinder","draw-plane",
             "draw-sphere","draw-string","clamp","deg-to-rad","rad-to-deg",
-            "dist","lerp","map","noise","draw-image","draw-video","draw-camera"
+            "dist","lerp","map","noise","draw-image","draw-video","draw-camera","draw-screen"
         };
 
         for (auto& k : keywords){

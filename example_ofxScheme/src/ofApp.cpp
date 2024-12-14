@@ -47,7 +47,7 @@ void ofApp::setup(){
                     "draw-bezier","draw-circle","draw-ellipse","draw-rectangle",
                     "draw-triangle","draw-cube","draw-cone","draw-cylinder","draw-plane",
                     "draw-sphere","draw-string","clamp","deg-to-rad","rad-to-deg",
-                    "dist","lerp","map","noise","draw-image","draw-video","draw-camera"};
+                    "dist","lerp","map","noise","draw-image","draw-video","draw-camera","draw-screen"};
     ofxSchemeAPIDesc.assign(ofxSchemeAPI.size(),"");
     ofxSchemeAPIDesc[0] = "(loop index  start  end increment)  -->  use loop as you would use every iterative structure ( for, while, etc... )";
     ofxSchemeAPIDesc[1] = "(MOUSE_X)  -->  Returns Mouse X position on screen";
@@ -91,7 +91,8 @@ void ofApp::setup(){
     ofxSchemeAPIDesc[39] = "(noise x y z)  --> calculates a three dimensional Simplex Noise value between 0.0...1.0";
     ofxSchemeAPIDesc[40] = "(draw-image index path x y w h)  -->  draw image file with specified path ( path must be relative to script path), at specified position with specified dimensions";
     ofxSchemeAPIDesc[41] = "(draw-video index path x y w h)  -->  draw video file with specified path ( path must be relative to script path), at specified position with specified dimensions";
-    ofxSchemeAPIDesc[42] = "(draw-camera index path x y w h)  -->  draw camera with specified index ( check console ), at specified position with specified dimensions";
+    ofxSchemeAPIDesc[42] = "(draw-camera index x y w h)  -->  draw camera with specified index ( check console ), at specified position with specified dimensions";
+    ofxSchemeAPIDesc[43] = "(draw-screen x y w h)  -->  draw output screen at specified position with specified dimensions ( useful for feedbacks )";
 
     // open default script
     needToLoadScript = true;
@@ -124,6 +125,7 @@ void ofApp::update(){
 
     scheme.setMouse((ofGetMouseX() - thposX)/thdrawW * fbo->getWidth(),(ofGetMouseY() - thposY)/thdrawH * fbo->getHeight());
     scheme.update();
+    scheme.setScreenTexture(fbo->getTexture());
 
     if(needToLoadScript){
         needToLoadScript = false;

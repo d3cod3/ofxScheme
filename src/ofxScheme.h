@@ -51,6 +51,7 @@ public:
     void setWindowDim(int w, int h);
     void setMouse(float x, float y);
     void setScriptPath(string abspath);
+    void setScreenTexture(ofTexture tex);
 
 
     //---------------------------------------- API
@@ -105,8 +106,10 @@ public:
     static SCM image(SCM index, SCM path, SCM x, SCM y, SCM w, SCM h);
     // ofVideoPlayer
     static SCM video(SCM index, SCM path, SCM x, SCM y, SCM w, SCM h);
-    // oVideofGrabber
+    // ofVideofGrabber
     static SCM grabber(SCM index, SCM x, SCM y, SCM w, SCM h);
+    // Screen
+    static SCM outputTexture(SCM x, SCM y, SCM w, SCM h);
 
     //---------------------------------------- API
 
