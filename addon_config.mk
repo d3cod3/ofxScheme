@@ -69,5 +69,5 @@ linux:
         ADDON_LDFLAGS += -lguile-2.2 -lgc
 
 osx:
-        ADDON_INCLUDES += /usr/local/Cellar/guile/3.0.4/include/guile/3.0 /usr/local/opt/gmp/include /usr/local/opt/readline/include /usr/local/opt/bdw-gc/include
+        ADDON_INCLUDES += /usr/local/include/guile /usr/local/opt/gmp/include /usr/local/opt/readline/include /usr/local/opt/bdw-gc/include
         ADDON_LDFLAGS += -lguile-3.0 -lgc
