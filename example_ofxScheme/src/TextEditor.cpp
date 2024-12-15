@@ -4038,7 +4038,7 @@ const TextEditor::LanguageDefinition& TextEditor::LanguageDefinition::SimpleCons
     if (!inited)
     {
         static const char* const keywords[] = {
-            "help","list_files","api_methods","random_example","exit",
+            "help","list_files","api_methods","random_example","browser","exit",
             "loop","MOUSE_X","MOUSE_Y","OUTPUT_WIDTH","OUTPUT_HEIGHT",
             "background","background-alpha","set-color","fill","no-fill",
             "push","pop","begin-shape","end-shape","translate","rotate",

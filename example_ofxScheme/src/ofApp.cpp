@@ -352,8 +352,10 @@ void ofApp::setupCommands(){
     commandsList[index+2].description = "List all OF scheme live-coding methods";
     commandsList[index+3].command = "random_example";
     commandsList[index+3].description = "Load and run a random example";
-    commandsList[index+4].command = "exit";
-    commandsList[index+4].description = "Quit Scheme Live Coding";
+    commandsList[index+4].command = "browser";
+    commandsList[index+4].description = "Open your predefined internet browser";
+    commandsList[index+5].command = "exit";
+    commandsList[index+5].description = "Quit Scheme Live Coding";
 }
 
 //--------------------------------------------------------------
@@ -420,6 +422,8 @@ void ofApp::sendCommand(string &command){
 
         ofLog(OF_LOG_NOTICE,"Loaded random example: %s",temp.getFile(0).getFileName().c_str());
 
+    }else if(command == "browser"){
+        ofLaunchBrowser("https://www.duckduckgo.com");
     }else if(command == "exit"){
         scheme.clearScript();
         scheme.evalScript("");
