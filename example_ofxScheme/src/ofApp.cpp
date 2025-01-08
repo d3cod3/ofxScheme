@@ -81,7 +81,7 @@ void ofApp::setup(){
     ofxSchemeAPIDesc[29] = "(draw-cylinder x y z radius height rRes hRes) --> draw a cylinder at the specified position, with the specified radius and height with specified resolutions";
     ofxSchemeAPIDesc[30] = "(draw-plane x y z w h resX resY) --> draw a plane at the specified position, with the specified width and height and with specified resolutions";
     ofxSchemeAPIDesc[31] = "(draw-sphere size res) --> draw a sphere at origin position( 0, 0 ) ( use translate to change origin ) of the specified size and with the specified resolution";
-    ofxSchemeAPIDesc[32] = "(draw-string text x y) | (draw-string text x y font fontsize) --> draw a text at the specified position, can be set the font file ( path must be relative to script path) and font size";
+    ofxSchemeAPIDesc[32] = "(draw-string 'text' x y) | (draw-string 'text' x y 'font' fontsize) --> draw a text at the specified position, can be set the font file ( path must be relative to script path) and font size";
     ofxSchemeAPIDesc[33] = "(clamp value min max)  --> restricts a value to be within a specified range defined by values min and max";
     ofxSchemeAPIDesc[34] = "(deg-to-rad degree)  --> convert degrees to radians";
     ofxSchemeAPIDesc[35] = "(rad-to-deg radians)  --> convert radians to degrees";
@@ -89,9 +89,9 @@ void ofApp::setup(){
     ofxSchemeAPIDesc[37] = "(lerp start stop amount)  --> linearly interpolate a value within a range";
     ofxSchemeAPIDesc[38] = "(map value minIN maxIN minOUT maxOUT)  --> given a value and an input range, map the value to an output range";
     ofxSchemeAPIDesc[39] = "(noise x y z)  --> calculates a three dimensional Simplex Noise value between 0.0...1.0";
-    ofxSchemeAPIDesc[40] = "(draw-image index path x y w h)  -->  draw image file with specified path ( path must be relative to script path), at specified position with specified dimensions";
-    ofxSchemeAPIDesc[41] = "(draw-video index path x y w h)  -->  draw video file with specified path ( path must be relative to script path), at specified position with specified dimensions";
-    ofxSchemeAPIDesc[42] = "(draw-camera index x y w h)  -->  draw camera with specified index ( check console ), at specified position with specified dimensions";
+    ofxSchemeAPIDesc[40] = "(draw-image index 'path' x y w h) | (draw-image index 'path' x y w h lockproportion)  -->  draw image file with specified path ( path must be relative to script path), at specified position with specified dimensions, choosing to maintain proportions or not";
+    ofxSchemeAPIDesc[41] = "(draw-video index 'path' x y w h) | (draw-video index 'path' x y w h lockproportion)  -->  draw video file with specified path ( path must be relative to script path), at specified position with specified dimensions, choosing to maintain proportions or not";
+    ofxSchemeAPIDesc[42] = "(draw-camera index x y w h) | (draw-camera index x y w h lockproportion)  -->  draw camera with specified index ( check console ), at specified position with specified dimensions, choosing to maintain proportions or not";
     ofxSchemeAPIDesc[43] = "(draw-screen x y w h)  -->  draw output screen at specified position with specified dimensions ( useful for feedbacks )";
 
     // open default script
@@ -242,7 +242,7 @@ void ofApp::keyPressed(int key){
     }
 
     // send regular key pressed to script if the editor is hidden
-    if(!hideEditor && !showGUI) {
+    if(!hideEditor && !showGUI && ofGetWindowPtr() != nullptr) {
         editor.keyPressed(key);
     }
 

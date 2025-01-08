@@ -45,13 +45,14 @@ public:
 
     void setup();
     void update();
-    const char* evalScript(string scriptContent);
+    const char* evalScript(std::string scriptContent);
     void clearScript();
 
     void setWindowDim(int w, int h);
     void setMouse(float x, float y);
-    void setScriptPath(string abspath);
+    void setScriptPath(std::string abspath);
     void setScreenTexture(ofTexture tex);
+    void setExternalData(std::vector<float> data);
 
 
     //---------------------------------------- API
@@ -65,6 +66,8 @@ public:
     static SCM get_window_height();
     // Time
     static SCM get_time();
+    // External Data
+    static SCM getExternalDataAt(SCM i);
     // Graphics
     static SCM background(SCM r, SCM g, SCM b);
     static SCM background_alpha(SCM r, SCM g, SCM b, SCM a);
@@ -103,11 +106,11 @@ public:
     static SCM map(SCM v, SCM imin, SCM imax, SCM omin, SCM omax);
     static SCM noise(SCM x, SCM y, SCM z);
     // ofImage
-    static SCM image(SCM index, SCM path, SCM x, SCM y, SCM w, SCM h);
+    static SCM image(SCM index, SCM path, SCM x, SCM y, SCM w, SCM h, SCM lockproportion);
     // ofVideoPlayer
-    static SCM video(SCM index, SCM path, SCM x, SCM y, SCM w, SCM h);
+    static SCM video(SCM index, SCM path, SCM x, SCM y, SCM w, SCM h, SCM lockproportion);
     // ofVideofGrabber
-    static SCM grabber(SCM index, SCM x, SCM y, SCM w, SCM h);
+    static SCM grabber(SCM index, SCM x, SCM y, SCM w, SCM h, SCM lockproportion);
     // Screen
     static SCM outputTexture(SCM x, SCM y, SCM w, SCM h);
 

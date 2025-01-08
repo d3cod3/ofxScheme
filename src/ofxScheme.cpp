@@ -50,6 +50,9 @@ void* register_functions(void* data){
     // Time
     scm_c_define_gsubr("time", 0, 0, 0, (scm_t_subr)(&ofxScheme::get_time));
 
+    // External Data
+    scm_c_define_gsubr("mosaic_data_inlet", 1, 0, 0, (scm_t_subr)(&ofxScheme::getExternalDataAt));
+
     // Graphics
     scm_c_define_gsubr("background", 3, 0, 0, (scm_t_subr)(&ofxScheme::background));
     scm_c_define_gsubr("background-alpha", 4, 0, 0, (scm_t_subr)(&ofxScheme::background_alpha));
@@ -93,13 +96,13 @@ void* register_functions(void* data){
     scm_c_define_gsubr("noise", 3, 0, 0, (scm_t_subr)(&ofxScheme::noise));
 
     // ofImage
-    scm_c_define_gsubr("draw-image", 6, 0, 0, (scm_t_subr)(&ofxScheme::image));
+    scm_c_define_gsubr("draw-image", 6, 1, 0, (scm_t_subr)(&ofxScheme::image));
 
     // ofVideoPlayer
-    scm_c_define_gsubr("draw-video", 6, 0, 0, (scm_t_subr)(&ofxScheme::video));
+    scm_c_define_gsubr("draw-video", 6, 1, 0, (scm_t_subr)(&ofxScheme::video));
 
     // oVideofGrabber
-    scm_c_define_gsubr("draw-camera", 5, 0, 0, (scm_t_subr)(&ofxScheme::grabber));
+    scm_c_define_gsubr("draw-camera", 5, 1, 0, (scm_t_subr)(&ofxScheme::grabber));
 
     // Screen
     scm_c_define_gsubr("draw-screen", 4, 0, 0, (scm_t_subr)(&ofxScheme::outputTexture));
@@ -110,17 +113,18 @@ void* register_functions(void* data){
 
 
 // ofxScheme Live Coding VARS ----------------------------------
-std::map<int,int>           loopIterators;
-string                      scriptPath;
-int                         winW, winH;
-float                       mouseX, mouseY;
+std::map<int,int>                       loopIterators;
+std::string                             scriptPath;
+int                                     winW, winH;
+float                                   mouseX, mouseY;
 
-std::map<int,ofImage>           images;
-std::map<int,ofVideoPlayer>     videos;
-std::map<int,ofVideoGrabber>    cams;
-std::map<string,ofTrueTypeFont> fonts;
+std::map<int,ofImage>                   images;
+std::map<int,ofVideoPlayer>             videos;
+std::map<int,ofVideoGrabber>            cams;
+std::map<std::string,ofTrueTypeFont>    fonts;
 
-ofTexture                       screenTexture;
+ofTexture                               screenTexture;
+std::vector<float>                      externalData;
 
 
 //--------------------------------------------------------------
@@ -130,7 +134,7 @@ ofxScheme::ofxScheme(){
 
 //--------------------------------------------------------------
 ofxScheme::~ofxScheme(){
-
+    scm_primitive_exit(NULL);
 }
 
 //--------------------------------------------------------------
@@ -140,6 +144,8 @@ void ofxScheme::setup(){
   setWindowDim(1280,720);
 
   screenTexture.allocate(ofGetScreenWidth(),ofGetScreenHeight(),GL_RGBA);
+
+  externalData.assign(1,0.0f);
 }
 
 //--------------------------------------------------------------
@@ -160,7 +166,7 @@ void ofxScheme::update(){
 }
 
 //--------------------------------------------------------------
-const char* ofxScheme::evalScript(string scriptContent){
+const char* ofxScheme::evalScript(std::string scriptContent){
     return gdbscm_safe_eval_string(scriptContent.c_str());
     //scm_c_eval_string(scriptContent.c_str());
 }
@@ -187,7 +193,7 @@ void ofxScheme::setMouse(float x, float y){
 }
 
 //--------------------------------------------------------------
-void ofxScheme::setScriptPath(string abspath){
+void ofxScheme::setScriptPath(std::string abspath){
     ofFile tempFileScript(abspath);
     //scriptPath = tempFileScript.getEnclosingDirectory().substr(0,tempFileScript.getEnclosingDirectory().size());
     scriptPath = abspath+"/";
@@ -197,6 +203,11 @@ void ofxScheme::setScriptPath(string abspath){
 //--------------------------------------------------------------
 void ofxScheme::setScreenTexture(ofTexture tex){
     screenTexture = tex;
+}
+
+//--------------------------------------------------------------
+void ofxScheme::setExternalData(std::vector<float> data){
+    externalData = data;
 }
 
 //-------------------------------------------------------------- SCHEME DSL LANGUAGE
@@ -242,6 +253,16 @@ SCM ofxScheme::get_window_height(){
 // ------------------------------------------------------------- Time
 SCM ofxScheme::get_time(){
     return  scm_from_int16( ofGetElapsedTimeMillis() );
+}
+
+// ------------------------------------------------------------- External Data
+SCM ofxScheme::getExternalDataAt(SCM i){
+    if(externalData.size() > scm_to_int16(i)){
+        return scm_from_double(externalData.at(scm_to_int16(i)));
+    }else{
+        return scm_from_double(0.0f);
+    }
+
 }
 
 // ------------------------------------------------------------- Graphics
@@ -406,7 +427,7 @@ SCM ofxScheme::sphere(SCM s, SCM res){
 }
 
 SCM ofxScheme::bitmap_string(SCM text, SCM x, SCM y, SCM font, SCM fontsize){
-    string temp = "";
+    std::string temp = "";
     int fs = 0;
     if (scm_is_eq (font, SCM_UNDEFINED)){
         temp = "default";
@@ -421,7 +442,7 @@ SCM ofxScheme::bitmap_string(SCM text, SCM x, SCM y, SCM font, SCM fontsize){
 
         if(fonts.find(temp) == fonts.end()){
             ofTrueTypeFont ttf;
-            string abspath = scriptPath+temp;
+            std::string abspath = scriptPath+temp;
             ttf.load(abspath,fs);
 
             fonts[temp] = ttf;
@@ -465,28 +486,46 @@ SCM ofxScheme::noise(SCM x, SCM y, SCM z){
 
 
 // ------------------------------------------------------------- ofImage
-SCM ofxScheme::image(SCM index, SCM path, SCM x, SCM y, SCM w, SCM h){
+SCM ofxScheme::image(SCM index, SCM path, SCM x, SCM y, SCM w, SCM h, SCM lockproportion){
 
     if(images.find(scm_to_int16(index)) == images.end()){
         ofImage temp;
-        string abspath = scriptPath+scm_to_locale_string(path);
+        std::string abspath = scriptPath+scm_to_locale_string(path);
         temp.load(abspath);
 
         images[scm_to_int16(index)] = temp;
     }else{
-        images[scm_to_int16(index)].draw(scm_to_double(x),scm_to_double(y),scm_to_double(w),scm_to_double(h));
-    }
+        if (scm_is_eq (lockproportion, SCM_UNDEFINED)){
+            images[scm_to_int16(index)].draw(scm_to_double(x),scm_to_double(y),scm_to_double(w),scm_to_double(h));
+        }else{
+            float thdrawW,thdrawH,thposX,thposY;
+            // wider image than drawing dimensions ( w x h )
+            if(images[scm_to_int16(index)].getWidth()/images[scm_to_int16(index)].getHeight() >= scm_to_double(w)/scm_to_double(h)){
+                thdrawW           = scm_to_double(w);
+                thdrawH           = (images[scm_to_int16(index)].getHeight()*scm_to_double(w)) / images[scm_to_int16(index)].getWidth();
+                thposX            = 0;
+                thposY            = (scm_to_double(h)-thdrawH)/2.0f;
+            // wider drawing dimensions ( w x h ) than image
+            }else{
+                thdrawW           = (images[scm_to_int16(index)].getWidth()*scm_to_double(h)) / images[scm_to_int16(index)].getHeight();
+                thdrawH           = scm_to_double(h);
+                thposX            = (scm_to_double(w)-thdrawW)/2.0f;
+                thposY            = 0;
+            }
+            images[scm_to_int16(index)].draw(thposX+scm_to_double(x),thposY+scm_to_double(y),thdrawW,thdrawH);
+        }
 
+    }
 
     return SCM_UNSPECIFIED;
 }
 
 // ------------------------------------------------------------- ofVideoPlayer
-SCM ofxScheme::video(SCM index, SCM path, SCM x, SCM y, SCM w, SCM h){
+SCM ofxScheme::video(SCM index, SCM path, SCM x, SCM y, SCM w, SCM h, SCM lockproportion){
 
     if(videos.find(scm_to_int16(index)) == videos.end()){
         ofVideoPlayer temp;
-        string abspath = scriptPath+scm_to_locale_string(path);
+        std::string abspath = scriptPath+scm_to_locale_string(path);
         temp.load(abspath);
         temp.setVolume(0);
         temp.setLoopState(OF_LOOP_NORMAL);
@@ -494,14 +533,33 @@ SCM ofxScheme::video(SCM index, SCM path, SCM x, SCM y, SCM w, SCM h){
 
         videos[scm_to_int16(index)] = temp;
     }else{
-        videos[scm_to_int16(index)].draw(scm_to_double(x),scm_to_double(y),scm_to_double(w),scm_to_double(h));
+        if (scm_is_eq (lockproportion, SCM_UNDEFINED)){
+            videos[scm_to_int16(index)].draw(scm_to_double(x),scm_to_double(y),scm_to_double(w),scm_to_double(h));
+        }else{
+            float thdrawW,thdrawH,thposX,thposY;
+            // wider image than drawing dimensions ( w x h )
+            if(videos[scm_to_int16(index)].getWidth()/videos[scm_to_int16(index)].getHeight() >= scm_to_double(w)/scm_to_double(h)){
+                thdrawW           = scm_to_double(w);
+                thdrawH           = (videos[scm_to_int16(index)].getHeight()*scm_to_double(w)) / videos[scm_to_int16(index)].getWidth();
+                thposX            = 0;
+                thposY            = (scm_to_double(h)-thdrawH)/2.0f;
+            // wider drawing dimensions ( w x h ) than image
+            }else{
+                thdrawW           = (videos[scm_to_int16(index)].getWidth()*scm_to_double(h)) / videos[scm_to_int16(index)].getHeight();
+                thdrawH           = scm_to_double(h);
+                thposX            = (scm_to_double(w)-thdrawW)/2.0f;
+                thposY            = 0;
+            }
+            videos[scm_to_int16(index)].draw(thposX+scm_to_double(x),thposY+scm_to_double(y),thdrawW,thdrawH);
+        }
+
     }
 
     return SCM_UNSPECIFIED;
 }
 
 // ------------------------------------------------------------- ofVideoGrabber
-SCM ofxScheme::grabber(SCM index, SCM x, SCM y, SCM w, SCM h){
+SCM ofxScheme::grabber(SCM index, SCM x, SCM y, SCM w, SCM h, SCM lockproportion){
 
     if(cams.find(scm_to_int16(index)) == cams.end()){
         ofVideoGrabber temp;
@@ -510,7 +568,26 @@ SCM ofxScheme::grabber(SCM index, SCM x, SCM y, SCM w, SCM h){
 
         cams[scm_to_int16(index)] = temp;
     }else{
-        cams[scm_to_int16(index)].draw(scm_to_double(x),scm_to_double(y),scm_to_double(w),scm_to_double(h));
+        if (scm_is_eq (lockproportion, SCM_UNDEFINED)){
+            cams[scm_to_int16(index)].draw(scm_to_double(x),scm_to_double(y),scm_to_double(w),scm_to_double(h));
+        }else{
+            float thdrawW,thdrawH,thposX,thposY;
+            // wider image than drawing dimensions ( w x h )
+            if(cams[scm_to_int16(index)].getWidth()/cams[scm_to_int16(index)].getHeight() >= scm_to_double(w)/scm_to_double(h)){
+                thdrawW           = scm_to_double(w);
+                thdrawH           = (cams[scm_to_int16(index)].getHeight()*scm_to_double(w)) / cams[scm_to_int16(index)].getWidth();
+                thposX            = 0;
+                thposY            = (scm_to_double(h)-thdrawH)/2.0f;
+            // wider drawing dimensions ( w x h ) than image
+            }else{
+                thdrawW           = (cams[scm_to_int16(index)].getWidth()*scm_to_double(h)) / cams[scm_to_int16(index)].getHeight();
+                thdrawH           = scm_to_double(h);
+                thposX            = (scm_to_double(w)-thdrawW)/2.0f;
+                thposY            = 0;
+            }
+            cams[scm_to_int16(index)].draw(thposX+scm_to_double(x),thposY+scm_to_double(y),thdrawW,thdrawH);
+        }
+
     }
 
     return SCM_UNSPECIFIED;

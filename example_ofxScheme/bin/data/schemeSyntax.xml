@@ -47,7 +47,6 @@
         <keyword>caddr</keyword>
         <keyword>cadr</keyword>
         <keyword>car</keyword>
-        <keyword>car+cdr</keyword>
         <keyword>case</keyword>
         <keyword>cd</keyword>
         <keyword>cdaaar</keyword>
@@ -89,7 +88,7 @@
         <keyword>epoch</keyword>
         <keyword>error</keyword>
         <keyword>false</keyword>
-        <keyword>for-all?</keyword>
+        <keyword>for-all</keyword>
         <keyword>for-each</keyword>
         <keyword>gcd</keyword>
         <keyword>ge</keyword>
