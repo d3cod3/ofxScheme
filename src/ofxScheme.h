@@ -34,7 +34,7 @@
 
 #include "ofMain.h"
 
-#include <libguile.h>
+#include "guile/2.2/libguile.h"
 
 class ofxScheme {
 
